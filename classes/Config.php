@@ -18,7 +18,7 @@ class Config
 
             return $config;
         } else {
-            return '<h3>get require a parameter';
+            return '<h3>get require a parameter</h3>';
         }
     }
 }
