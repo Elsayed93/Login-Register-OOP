@@ -1,4 +1,7 @@
 <?php
+
+use function PHPSTORM_META\type;
+
 class DB
 {
     private static $_instance;
@@ -13,9 +16,9 @@ class DB
         try {
             $this->_pdo = new PDO('mysql:host=' . Config::get('mysql/host') . ';dbname=' . Config::get('mysql/db'), Config::get('mysql/username'), Config::get('mysql/password'));
 
-            if ($this->_pdo) {
-                echo 'connected';
-            }
+            // if ($this->_pdo) {
+            //     echo 'connected';
+            // }
         } catch (\PDOException $th) {
             //throw $th;
             die($th->getMessage());
@@ -29,5 +32,80 @@ class DB
         }
 
         return self::$_instance;
+    }
+
+    // action function 
+    private function action($action, $table, $where = [])
+    {
+      
+
+        if (count($where) === 3) {
+            $operators = ['=', '<', '>', '<=', '>=', '!='];
+
+            $field = $where[0];
+            $operator = $where[1];
+            $value = $where[2];
+
+            if (in_array($operator, $operators)) {
+                $sql = "{$action} FROM {$table} WHERE {$field} {$operator} ?";
+
+                if (!$this->query($sql, array($value))->error()) {
+                    return $this;
+                }
+            }
+        }elseif(empty($where)){
+            $sql = "{$action} FROM {$table}";
+
+            if (!$this->query($sql)->error()) {
+                return $this;
+            }
+        }
+
+        return false;
+    }
+
+    // get function 
+    public function get($table, $where = [])
+    {
+        if (gettype($where) === 'array') {
+            return $this->action('SELECT *', $table, $where);
+        }
+    }
+
+    // delete function 
+    public function delete($table, $where)
+    {
+        if (gettype($where) === 'array') {
+            return $this->action('DELETE', $table, $where);
+        }
+    }
+
+    public function query($sql, $params = [])
+    {
+        $this->_error = false;
+
+        if ($this->_pdo->prepare($sql)) {
+            $this->_query =  $this->_pdo->prepare($sql);
+            $this->_query->execute($params);
+        }
+
+        if ($this->_query->execute($params)) {
+            $this->_results = $this->_query->fetchAll(PDO::FETCH_OBJ);
+            $this->_count = $this->_query->rowCount();
+        } else {
+            $this->_error = true;
+        }
+
+        return $this;
+    }
+
+    public function error()
+    {
+        return $this->_error;
+    }
+
+    public function countRows()
+    {
+        return $this->_count;
     }
 }
