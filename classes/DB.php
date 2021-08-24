@@ -37,7 +37,7 @@ class DB
     // action function 
     private function action($action, $table, $where = [])
     {
-      
+
 
         if (count($where) === 3) {
             $operators = ['=', '<', '>', '<=', '>=', '!='];
@@ -53,7 +53,7 @@ class DB
                     return $this;
                 }
             }
-        }elseif(empty($where)){
+        } elseif (empty($where)) {
             $sql = "{$action} FROM {$table}";
 
             if (!$this->query($sql)->error()) {
@@ -78,6 +78,16 @@ class DB
         if (gettype($where) === 'array') {
             return $this->action('DELETE', $table, $where);
         }
+    }
+
+    // results function 
+    public function results()
+    {
+        return $this->_results;
+    }
+
+    public function first(){
+        return  $this->results()[0];
     }
 
     public function query($sql, $params = [])

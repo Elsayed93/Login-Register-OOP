@@ -1,16 +1,23 @@
 <?php
 require_once 'core/init.php';
 
-// administrator'
 $query = DB::getInstance()->query("SELECT * FROM `groups` WHERE `name`=? OR `permissions`=?", ['administrator', '{"admin":1}']);
+$getData = DB::getInstance()->get('users');
+// $getData = DB::getInstance()->get('users', ['email', '=', 'user2@gmail.com']);
 
-$getGroups = DB::getInstance()->get('groups');
-// var_dump(DB::getInstance()->get('groups', ['name', '=', 'administrator']));
-// die;
 
-// var_dump($query);
-echo '<hr>';
 echo $query->error() ? 'ERROR' : 'OK';
 echo '<hr>';
 
-echo $getGroups->countRows() . ' Rows';
+
+if (!$getData->countRows()) {
+    echo '0 rows';
+} else {
+    echo  $getData->first()->email;
+    die;
+    foreach ($getData->results() as $key => $row) {
+        // echo $getData->countRows();
+        // echo '<hr>';
+        echo ($row->email)  . '<br>';
+    }
+}
